@@ -1,5 +1,5 @@
 # Multi-stage build for production deployment
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -16,12 +16,12 @@ COPY . .
 RUN npm run build
 
 # Production image
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
 # Set to production environment
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # Add non-root user
 RUN addgroup --system --gid 1001 nodejs
@@ -39,8 +39,8 @@ USER nextjs
 EXPOSE 3000
 
 # Set port environment variable
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Start the application
 CMD ["node", "server.js"]
