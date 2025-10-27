@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  storefront:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-traders-storefront
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=https://supabase.munene.shop
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_STORE_NAME=Smart Traders Store
+      - NEXT_PUBLIC_STORE_DESCRIPTION=Quality products at great prices
+      - NEXT_PUBLIC_CURRENCY=KES
+      - NEXT_PUBLIC_ENABLE_REAL_TIME=true
+      - NEXT_PUBLIC_SHOW_STOCK_COUNT=true
+      - NEXT_PUBLIC_LOW_STOCK_THRESHOLD=10
+    networks:
+      - smart-traders-network
+
+networks:
+  smart-traders-network:
+    external: true
+
