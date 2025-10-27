@@ -1,0 +1,26 @@
+# Simple single-stage build for faster deployment
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies first (better caching)
+COPY package*.json ./
+RUN npm install --omit=dev --no-audit --progress=false
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Set production environment
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Expose port
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]
+
