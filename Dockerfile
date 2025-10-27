@@ -6,8 +6,11 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with timeout and retries
+RUN npm config set fetch-retry-maxtimeout 60000 && \
+    npm config set fetch-retry-mintimeout 10000 && \
+    npm config set fetch-retries 3 && \
+    npm ci --prefer-offline --no-audit --progress=false
 
 # Copy source code
 COPY . .
