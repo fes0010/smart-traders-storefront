@@ -1,331 +1,297 @@
 # 🛍️ Smart Traders E-Commerce Storefront
 
-A modern, real-time e-commerce storefront built with Next.js 14, TypeScript, and Supabase. Features live inventory updates, shopping cart persistence, and seamless checkout.
+<div align="center">
+
+[![Next.js](https://img.shields.io/badge/Next.js-16.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
+[![Supabase](https://img.shields.io/badge/Supabase-Realtime-green?style=for-the-badge&logo=supabase)](https://supabase.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com)
+
+**A modern, real-time e-commerce storefront with live inventory updates**
+
+[Features](#-features) • [Demo](#-demo) • [Quick Start](#-quick-start) • [Deploy](#-deployment) • [Docs](#-documentation)
+
+</div>
+
+---
+
+## 🎯 Overview
+
+A production-ready e-commerce storefront built with **Next.js 14**, **Supabase**, and **TypeScript**. Features real-time inventory updates, persistent shopping cart, and seamless checkout - all without requiring customer authentication.
+
+### Why This Project?
+
+- ✅ **Real-time Everything** - Inventory updates instantly via Supabase Realtime
+- ✅ **Zero Authentication** - Customers shop without creating accounts
+- ✅ **Production Ready** - Docker + Vercel deployment configs included
+- ✅ **Type Safe** - Full TypeScript coverage
+- ✅ **Modern Stack** - Next.js 14 App Router, Server Components
+- ✅ **Beautiful UI** - Responsive design with Tailwind CSS
+
+---
 
 ## ✨ Features
 
-### Core Functionality
-- 🔴 **Real-time Product Updates** - Inventory and prices update live via Supabase Realtime
-- 🛒 **Persistent Shopping Cart** - Cart saves to localStorage, survives page refreshes
-- 🔍 **Smart Search & Filtering** - Search by name, SKU, or category
-- 📦 **Stock Management** - Low stock warnings and out-of-stock indicators
-- 💰 **Flexible Pricing** - Support for both retail and wholesale prices
-- ✅ **Seamless Checkout** - Simple, mobile-friendly checkout flow
-- 📱 **Responsive Design** - Works perfectly on all devices
+### For Customers
+- 🔍 **Smart Search & Filtering** - Find products by name, SKU, or category
+- 🛒 **Persistent Cart** - Cart survives browser refreshes (localStorage)
+- 💰 **Flexible Pricing** - Retail and wholesale price options
+- 📦 **Stock Indicators** - Real-time "Low Stock" and "Out of Stock" badges
+- ✅ **Simple Checkout** - No account required, just name and phone
+- 📱 **Mobile Optimized** - Perfect experience on all devices
+- 🔴 **Live Updates** - See inventory changes in real-time
 
-### Technical Features
-- ⚡ Server-side rendering with Next.js 14 App Router
-- 🎨 Beautiful UI with Tailwind CSS
-- 🔄 State management with Zustand
-- 📡 Real-time subscriptions via Supabase
-- 🎯 Type-safe with TypeScript
+### For Developers
+- ⚡ **Fast Performance** - Server-side rendering with Next.js
+- 🔐 **Secure** - Row Level Security (RLS) with Supabase
+- 🎨 **Customizable** - Easy to theme and extend
+- 🐳 **Docker Ready** - Multi-stage build included
+- 📊 **Well Documented** - Comprehensive docs and comments
+- 🧪 **Type Safe** - TypeScript throughout
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ installed
-- Access to your Supabase instance (https://supabase.munene.shop)
+- Node.js 18+
+- A Supabase instance (cloud or self-hosted)
 - Supabase anon key
 
 ### Installation
 
-1. **Navigate to the storefront directory:**
 ```bash
-cd e-commerce-storefront
-```
+# Clone the repository
+git clone https://github.com/fes0010/smart-traders-storefront.git
+cd smart-traders-storefront
 
-2. **Install dependencies:**
-```bash
+# Install dependencies
 npm install
-```
 
-3. **Configure environment variables:**
-Edit `.env.local` and add your Supabase credentials:
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://supabase.munene.shop
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-```
+# Configure environment
+cp .env.example .env.local
+# Edit .env.local with your Supabase credentials
 
-4. **Run the development server:**
-```bash
+# Run development server
 npm run dev
 ```
 
-5. **Open your browser:**
-Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase instance URL | ✅ Yes | - |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key | ✅ Yes | - |
-| `NEXT_PUBLIC_STORE_NAME` | Store display name | ❌ No | Smart Traders Store |
-| `NEXT_PUBLIC_STORE_DESCRIPTION` | Store meta description | ❌ No | Quality products at great prices |
-| `NEXT_PUBLIC_CURRENCY` | Currency code (KES, USD, etc.) | ❌ No | KES |
-| `NEXT_PUBLIC_ENABLE_REAL_TIME` | Enable live updates | ❌ No | true |
-| `NEXT_PUBLIC_SHOW_STOCK_COUNT` | Show stock quantities | ❌ No | true |
-| `NEXT_PUBLIC_LOW_STOCK_THRESHOLD` | Low stock warning level | ❌ No | 10 |
-
-### Database Requirements
-
-The storefront connects to the same database as your POS system. Ensure these tables exist:
-- `products` - Product catalog
-- `transactions` - Order records
-- `transaction_items` - Order line items
-
-No additional migrations needed! 🎉
-
-## 📦 Deployment
-
-### Option 1: Vercel (Recommended)
-
-Vercel is the easiest way to deploy Next.js apps:
-
-1. **Install Vercel CLI:**
-```bash
-npm i -g vercel
-```
-
-2. **Deploy:**
-```bash
-vercel
-```
-
-3. **Add environment variables in Vercel dashboard:**
-   - Go to your project settings
-   - Navigate to "Environment Variables"
-   - Add all `NEXT_PUBLIC_*` variables
-
-4. **Redeploy:**
-```bash
-vercel --prod
-```
-
-### Option 2: Dokploy (Same Server as POS)
-
-Deploy alongside your existing services:
-
-1. **Create `Dockerfile.production`:**
-```dockerfile
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:18-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV production
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-EXPOSE 3000
-ENV PORT 3000
-CMD ["node", "server.js"]
-```
-
-2. **Update `next.config.ts`:**
-```typescript
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
-  output: 'standalone',
-};
-
-export default nextConfig;
-```
-
-3. **Build Docker image:**
-```bash
-docker build -f Dockerfile.production -t smart-traders-storefront .
-```
-
-4. **Run container:**
-```bash
-docker run -d \
-  --name storefront \
-  -p 3000:3000 \
-  -e NEXT_PUBLIC_SUPABASE_URL=https://supabase.munene.shop \
-  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key \
-  smart-traders-storefront
-```
-
-5. **Configure Dokploy:**
-   - Add as new application
-   - Point to port 3000
-   - Set up domain (e.g., shop.munene.shop)
-
-### Option 3: Netlify
-
-1. **Install Netlify CLI:**
-```bash
-npm i -g netlify-cli
-```
-
-2. **Build:**
-```bash
-npm run build
-```
-
-3. **Deploy:**
-```bash
-netlify deploy --prod
-```
-
-4. **Configure environment variables in Netlify dashboard**
-
-## 🔐 Security Considerations
-
-### Row Level Security (RLS)
-
-Ensure your Supabase RLS policies allow public read access to products:
-
-```sql
--- Allow public to read active products
-CREATE POLICY "Public can read active products"
-ON products FOR SELECT
-USING (status = 'active');
-
--- Allow public to create transactions
-CREATE POLICY "Public can create transactions"
-ON transactions FOR INSERT
-WITH CHECK (true);
-
--- Allow public to create transaction items
-CREATE POLICY "Public can create transaction items"
-ON transaction_items FOR INSERT
-WITH CHECK (true);
-```
-
-### API Keys
-
-- ✅ Use the **anon/public** key (NEXT_PUBLIC_SUPABASE_ANON_KEY)
-- ❌ **Never** expose the service role key in frontend code
-
-## 🎨 Customization
-
-### Branding
-
-Update colors in `tailwind.config.ts`:
-```typescript
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        primary: '#3b82f6', // Your brand color
-      },
-    },
-  },
-};
-```
-
-### Add More Payment Methods
-
-Edit `components/CheckoutModal.tsx` to add payment gateways like:
-- M-Pesa integration
-- Stripe/PayPal
-- Bank transfers
-
-### Custom Product Fields
-
-Extend the `Product` type in `lib/supabase.ts`:
-```typescript
-export interface Product {
-  // ... existing fields
-  brand?: string;
-  weight?: number;
-  dimensions?: string;
-}
-```
-
-## 📊 Performance
-
-### Optimization Features
-- ⚡ Static generation where possible
-- 🗜️ Image optimization with Next.js Image
-- 📦 Code splitting and lazy loading
-- 💾 Client-side caching with Zustand persist
-
-### Monitoring
-
-Check real-time connection status:
-- Look for green "Live" badge in header
-- Console logs show subscription status
-- Network tab shows Realtime WebSocket connection
-
-## 🐛 Troubleshooting
-
-### Products Not Loading
-
-1. Check Supabase connection:
-```bash
-curl https://supabase.munene.shop/rest/v1/products?status=eq.active \
-  -H "apikey: your-anon-key"
-```
-
-2. Verify environment variables are set correctly
-3. Check browser console for errors
-
-### Real-time Not Working
-
-1. Ensure Realtime is enabled in Supabase dashboard
-2. Check RLS policies allow SELECT on products table
-3. Verify WebSocket connection in Network tab
-
-### Cart Not Persisting
-
-1. Check localStorage is enabled in browser
-2. Clear localStorage and try again:
-```javascript
-localStorage.removeItem('smart-traders-cart');
-```
-
-### Checkout Failing
-
-1. Verify RLS policies allow INSERT on transactions and transaction_items
-2. Check product quantities are sufficient
-3. Review browser console for error details
-
-## 📚 Tech Stack
-
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Database:** Supabase (PostgreSQL)
-- **State Management:** Zustand
-- **Icons:** Lucide React
-- **Deployment:** Vercel / Dokploy
-
-## 🤝 Integration with POS
-
-The storefront shares the same database as your POS system:
-- ✅ Inventory syncs automatically
-- ✅ Orders appear in POS transaction history
-- ✅ No duplicate data
-- ✅ Single source of truth
-
-## 📞 Support
-
-For issues or questions:
-1. Check this README
-2. Review browser console logs
-3. Check Supabase logs
-4. Contact system administrator
-
-## 🎉 What's Next?
-
-Future enhancements:
-- 📧 Email notifications for orders
-- 🔔 Push notifications for status updates
-- ⭐ Product reviews and ratings
-- 🎁 Discount codes and promotions
-- 📱 Progressive Web App (PWA) support
-- 🌍 Multi-language support
+Open [http://localhost:3000](http://localhost:3000) 🎉
 
 ---
 
-Built with ❤️ for Smart Traders
+## 🔧 Configuration
+
+Create a `.env.local` file:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+# Store Settings
+NEXT_PUBLIC_STORE_NAME=Your Store Name
+NEXT_PUBLIC_CURRENCY=USD
+
+# Features
+NEXT_PUBLIC_ENABLE_REAL_TIME=true
+NEXT_PUBLIC_SHOW_STOCK_COUNT=true
+NEXT_PUBLIC_LOW_STOCK_THRESHOLD=10
+```
+
+### Required Supabase Setup
+
+The storefront needs these RLS policies:
+
+```sql
+-- Allow public to view active products
+CREATE POLICY public_view_active_products 
+ON products FOR SELECT TO anon 
+USING (status = 'active');
+
+-- Allow public to create orders
+CREATE POLICY public_create_transactions 
+ON transactions FOR INSERT TO anon 
+WITH CHECK (true);
+
+-- Allow public to create order items
+CREATE POLICY public_create_transaction_items 
+ON transaction_items FOR INSERT TO anon 
+WITH CHECK (true);
+
+-- Allow inventory updates
+CREATE POLICY public_update_product_quantity 
+ON products FOR UPDATE TO anon 
+USING (true) WITH CHECK (true);
+```
+
+See [RLS_POLICIES_APPLIED.md](./RLS_POLICIES_APPLIED.md) for details.
+
+---
+
+## 📦 Deployment
+
+### Vercel (Recommended)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/fes0010/smart-traders-storefront)
+
+```bash
+npm i -g vercel
+vercel
+```
+
+### Docker
+
+```bash
+# Build
+docker build -t storefront .
+
+# Run
+docker run -d -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL=your-url \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key \
+  storefront
+```
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete guide.
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────┐
+│   Next.js Frontend  │
+│  - Product Listing  │
+│  - Shopping Cart    │
+│  - Checkout         │
+└──────────┬──────────┘
+           │
+           │ Supabase Client
+           │ (REST + WebSocket)
+           │
+┌──────────▼──────────┐
+│  Supabase Database  │
+│  - Products         │
+│  - Transactions     │
+│  - RLS Policies     │
+└─────────────────────┘
+```
+
+---
+
+## 📚 Documentation
+
+- **[README.md](./README.md)** - User guide and features
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Deployment instructions
+- **[PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md)** - Technical overview
+- **[RLS_POLICIES_APPLIED.md](./RLS_POLICIES_APPLIED.md)** - Security setup
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | Next.js 14 (App Router) |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS |
+| **Database** | Supabase (PostgreSQL) |
+| **State** | Zustand + React Query |
+| **Real-time** | Supabase Realtime |
+| **Icons** | Lucide React |
+
+---
+
+## 📸 Screenshots
+
+### Product Listing
+![Product Listing](https://via.placeholder.com/800x400?text=Product+Listing+Screenshot)
+
+### Shopping Cart
+![Shopping Cart](https://via.placeholder.com/800x400?text=Shopping+Cart+Screenshot)
+
+### Checkout
+![Checkout](https://via.placeholder.com/800x400?text=Checkout+Screenshot)
+
+---
+
+## 🎨 Customization
+
+### Change Colors
+
+Edit `tailwind.config.ts`:
+```typescript
+theme: {
+  extend: {
+    colors: {
+      primary: '#your-brand-color',
+    },
+  },
+}
+```
+
+### Add Payment Gateway
+
+See `components/CheckoutModal.tsx` - integrate M-Pesa, Stripe, PayPal, etc.
+
+### Custom Product Fields
+
+Extend the `Product` interface in `lib/supabase.ts`
+
+---
+
+## 🔐 Security
+
+- ✅ Row Level Security (RLS) enforced
+- ✅ Public users have read-only access to products
+- ✅ Orders are write-only (can create but not modify)
+- ✅ Service role key never exposed to frontend
+- ✅ All API calls use anon key with limited permissions
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Built for [Smart Traders](https://munene.shop)
+- Powered by [Supabase](https://supabase.com)
+- UI components inspired by [shadcn/ui](https://ui.shadcn.com)
+
+---
+
+## 📞 Support
+
+- 📧 Email: support@smarttraders.com
+- 🐛 Issues: [GitHub Issues](https://github.com/fes0010/smart-traders-storefront/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/fes0010/smart-traders-storefront/discussions)
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if you find it helpful!**
+
+Made with ❤️ by the Smart Traders Team
+
+[⬆ Back to Top](#-smart-traders-e-commerce-storefront)
+
+</div>
+
