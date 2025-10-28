@@ -6,6 +6,7 @@ import { useCartStore } from '@/lib/cart-store';
 import { ShoppingCart, Search, Filter, Zap } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import CartSidebar from '@/components/CartSidebar';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -119,53 +120,57 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
+      <header className="bg-[var(--card-bg)] shadow-sm sticky top-0 z-40 border-b border-[color:var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-[color:var(--foreground)]">
                 {process.env.NEXT_PUBLIC_STORE_NAME || 'Smart Traders Store'}
               </h1>
               {realtimeStatus === 'connected' && (
-                <span className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                <span className="flex items-center text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">
                   <Zap className="w-3 h-3 mr-1" />
                   Live
                 </span>
               )}
             </div>
 
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="relative p-2 text-[color:var(--muted)] hover:text-[color:var(--foreground)] transition-colors"
             >
               <ShoppingCart className="w-6 h-6" />
               {getTotalItems() > 0 && (
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-[var(--on-primary)] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {getTotalItems()}
                 </span>
               )}
             </button>
+            </div>
           </div>
 
           {/* Search and Filters */}
           <div className="mt-4 flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--muted)] w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)] text-[color:var(--foreground)]"
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-400" />
+              <Filter className="w-5 h-5 text-[color:var(--muted)]" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)] text-[color:var(--foreground)]"
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (
@@ -184,20 +189,20 @@ export default function Home() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm p-4 animate-pulse">
-                <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              <div key={i} className="rounded-lg shadow-sm p-4 animate-pulse card">
+                <div className="h-48 rounded-lg mb-4 bg-[color:var(--border)]"></div>
+                <div className="h-4 rounded mb-2 bg-[color:var(--border)]"></div>
+                <div className="h-4 rounded w-2/3 bg-[color:var(--border)]"></div>
               </div>
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No products found</p>
+            <p className="text-[color:var(--muted)] text-lg">No products found</p>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="mt-4 text-blue-600 hover:text-blue-700"
+                className="mt-4 text-[color:var(--primary)] hover:opacity-90"
               >
                 Clear search
               </button>
@@ -205,7 +210,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="mb-4 text-sm text-[color:var(--muted)]">
               Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

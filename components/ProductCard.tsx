@@ -24,9 +24,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+    <div className="rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden card">
       {/* Product Image */}
-      <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+      <div className="relative h-48 bg-[color:var(--background)] flex items-center justify-center">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -60,23 +60,23 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="p-4">
         <div className="mb-2">
           {product.category && (
-            <span className="text-xs text-gray-500 uppercase tracking-wide">
+            <span className="text-xs text-[color:var(--muted)] uppercase tracking-wide">
               {product.category}
             </span>
           )}
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+        <h3 className="text-lg font-semibold text-[color:var(--foreground)] mb-2 line-clamp-2">
           {product.name}
         </h3>
 
         {product.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+          <p className="text-sm text-[color:var(--muted)] mb-3 line-clamp-2">{product.description}</p>
         )}
 
         {/* Stock Info */}
         {process.env.NEXT_PUBLIC_SHOW_STOCK_COUNT === 'true' && !isOutOfStock && (
-          <div className="text-sm text-gray-600 mb-3 flex items-center gap-1">
+          <div className="text-sm text-[color:var(--muted)] mb-3 flex items-center gap-1">
             <Package className="w-4 h-4" />
             <span>{product.quantity} in stock</span>
           </div>
@@ -89,8 +89,8 @@ export default function ProductCard({ product }: ProductCardProps) {
               onClick={() => setSelectedPriceType('retail')}
               className={`flex-1 text-xs py-1 px-2 rounded transition-colors ${
                 selectedPriceType === 'retail'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)]'
+                  : 'bg-[color:var(--background)] text-[color:var(--muted)] hover:opacity-90'
               }`}
             >
               Retail
@@ -99,8 +99,8 @@ export default function ProductCard({ product }: ProductCardProps) {
               onClick={() => setSelectedPriceType('wholesale')}
               className={`flex-1 text-xs py-1 px-2 rounded transition-colors ${
                 selectedPriceType === 'wholesale'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)]'
+                  : 'bg-[color:var(--background)] text-[color:var(--muted)] hover:opacity-90'
               }`}
             >
               Wholesale
@@ -111,11 +111,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Price and Add to Cart */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-2xl font-bold text-[color:var(--foreground)]">
               {process.env.NEXT_PUBLIC_CURRENCY} {price.toFixed(2)}
             </div>
             {product.selling_mode === 'both' && (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-[color:var(--muted)]">
                 {selectedPriceType === 'retail' ? 'Retail' : 'Wholesale'} price
               </div>
             )}
@@ -126,8 +126,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             disabled={isOutOfStock}
             className={`p-3 rounded-full transition-all ${
               isOutOfStock
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
+                ? 'bg-[color:var(--border)] text-[color:var(--muted)] cursor-not-allowed'
+                : 'bg-[var(--primary)] text-[var(--on-primary)] hover:opacity-90 active:scale-95'
             }`}
           >
             <ShoppingCart className="w-5 h-5" />
@@ -137,4 +137,5 @@ export default function ProductCard({ product }: ProductCardProps) {
     </div>
   );
 }
+
 

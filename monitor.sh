@@ -76,3 +76,4 @@ if [ "$RESTART_COUNT" -gt 3 ]; then
     echo -e "${RED}⚠️  High restart count detected!${NC}"
 fi
 
+

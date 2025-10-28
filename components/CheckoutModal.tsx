@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
 import { supabase, Customer } from '@/lib/supabase';
-import { X, CreditCard, Check, Loader2 } from 'lucide-react';
+import { X, CreditCard, Check, Loader2, MapPin, User, Phone, Mail } from 'lucide-react';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -19,6 +19,11 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     email: '',
   });
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [address, setAddress] = useState({
+    line1: '',
+    city: '',
+    notes: '',
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderCode, setOrderCode] = useState('');
@@ -43,6 +48,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           payment_method: paymentMethod,
           view_mode: 'retail', // E-commerce is retail by default
           unique_code: code,
+          address_line1: address.line1 || null,
+          address_city: address.city || null,
+          address_notes: address.notes || null,
         })
         .select()
         .single();
@@ -95,6 +103,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         email: '',
       });
       setOrderCode('');
+      setAddress({ line1: '', city: '', notes: '' });
     }
     onClose();
   };
@@ -109,9 +118,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-[var(--card-bg)] text-[color:var(--foreground)] rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-[color:var(--border)]">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
+          <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-[var(--card-bg)] border-[color:var(--border)]">
             <h2 className="text-xl font-bold">
               {orderComplete ? 'Order Complete!' : 'Checkout'}
             </h2>
@@ -136,9 +145,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <p className="text-gray-600 mb-4">
                   Your order has been successfully placed.
                 </p>
-                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="bg-[color:var(--background)] rounded-lg p-4 mb-6 border border-[color:var(--border)]">
                   <p className="text-sm text-gray-600 mb-1">Order Code</p>
-                  <p className="text-xl font-mono font-bold text-gray-900">
+                  <p className="text-xl font-mono font-bold">
                     {orderCode}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">
@@ -147,7 +156,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 </div>
                 <button
                   onClick={handleClose}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="w-full btn-primary py-3 rounded-lg font-semibold hover:opacity-90 transition-colors"
                 >
                   Continue Shopping
                 </button>
@@ -156,7 +165,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               /* Checkout Form */
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Order Summary */}
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="rounded-lg p-4 border border-[color:var(--border)]">
                   <h3 className="font-semibold mb-2">Order Summary</h3>
                   <div className="space-y-1 text-sm">
                     {items.map((item) => (
@@ -188,7 +197,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   <h3 className="font-semibold mb-3">Customer Information</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         First Name *
                       </label>
                       <input
@@ -198,12 +207,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         onChange={(e) =>
                           setCustomer({ ...customer, first_name: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Last Name
                       </label>
                       <input
@@ -212,12 +221,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         onChange={(e) =>
                           setCustomer({ ...customer, last_name: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Phone Number *
                       </label>
                       <input
@@ -227,12 +236,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         onChange={(e) =>
                           setCustomer({ ...customer, phone: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Email (Optional)
                       </label>
                       <input
@@ -241,7 +250,42 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         onChange={(e) =>
                           setCustomer({ ...customer, email: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shipping Address */}
+                <div>
+                  <h3 className="font-semibold mb-3">Shipping Address</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Address Line *</n+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={address.line1}
+                        onChange={(e) => setAddress({ ...address, line1: e.target.value })}
+                        className="w-full px-3 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">City *</label>
+                      <input
+                        type="text"
+                        required
+                        value={address.city}
+                        onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                        className="w-full px-3 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Notes</label>
+                      <textarea
+                        value={address.notes}
+                        onChange={(e) => setAddress({ ...address, notes: e.target.value })}
+                        className="w-full px-3 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent bg-[var(--card-bg)]"
                       />
                     </div>
                   </div>
@@ -251,7 +295,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <div>
                   <h3 className="font-semibold mb-3">Payment Method</h3>
                   <div className="space-y-2">
-                    <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <label className="flex items-center p-3 border border-[color:var(--border)] rounded-lg cursor-pointer hover:bg-[color:var(--background)]">
                       <input
                         type="radio"
                         name="payment"
@@ -263,7 +307,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       <CreditCard className="w-5 h-5 mr-2 text-gray-600" />
                       <span>Cash on Delivery</span>
                     </label>
-                    <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <label className="flex items-center p-3 border border-[color:var(--border)] rounded-lg cursor-pointer hover:bg-[color:var(--background)]">
                       <input
                         type="radio"
                         name="payment"
@@ -282,7 +326,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full btn-primary py-3 rounded-lg font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <>
@@ -301,4 +345,5 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     </>
   );
 }
+
 

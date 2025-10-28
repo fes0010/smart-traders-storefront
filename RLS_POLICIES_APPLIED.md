@@ -136,3 +136,4 @@ DROP POLICY IF EXISTS public_update_product_quantity ON products;
 
 **✅ Your e-commerce store is now fully functional with proper security!**
 
+
