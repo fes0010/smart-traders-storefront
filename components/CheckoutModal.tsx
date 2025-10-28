@@ -261,7 +261,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   <h3 className="font-semibold mb-3">Shipping Address</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Address Line *</n+                      </label>
+                      <label className="block text-sm font-medium mb-1">Address Line *</label>
                       <input
                         type="text"
                         required
