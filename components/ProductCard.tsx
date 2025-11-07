@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Product } from '@/lib/supabase';
 import { useCartStore } from '@/lib/cart-store';
-import { ShoppingCart, Package, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Package } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -14,13 +14,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCartStore();
 
   const price = selectedPriceType === 'retail' ? product.retail_price : product.wholesale_price;
-  const isLowStock = product.quantity <= product.min_stock_level;
-  const isOutOfStock = product.quantity === 0;
 
   const handleAddToCart = () => {
-    if (!isOutOfStock) {
-      addItem(product, selectedPriceType);
-    }
+    addItem(product, selectedPriceType);
   };
 
   return (
@@ -62,13 +58,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="text-sm text-[color:var(--muted)] mb-3 line-clamp-2">{product.description}</p>
         )}
 
-        {/* Stock Info */}
-        {process.env.NEXT_PUBLIC_SHOW_STOCK_COUNT === 'true' && !isOutOfStock && (
-          <div className="text-sm text-[color:var(--muted)] mb-3 flex items-center gap-1">
-            <Package className="w-4 h-4" />
-            <span>{product.quantity} in stock</span>
-          </div>
-        )}
 
         {/* Price Type Selector */}
         {product.selling_mode === 'both' && (
@@ -111,12 +100,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <button
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className={`p-3 rounded-full transition-all ${
-              isOutOfStock
-                ? 'bg-[color:var(--border)] text-[color:var(--muted)] cursor-not-allowed'
-                : 'bg-[var(--primary)] text-[var(--on-primary)] hover:opacity-90 active:scale-95'
-            }`}
+            className="p-3 rounded-full transition-all bg-[var(--primary)] text-[var(--on-primary)] hover:opacity-90 active:scale-95"
           >
             <ShoppingCart className="w-5 h-5" />
           </button>
