@@ -74,10 +74,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         created_at: new Date().toISOString(),
       };
 
-      const success = await sendOrderToN8N(webhookPayload);
+      const result = await sendOrderToN8N(webhookPayload);
       
-      if (!success) {
-        throw new Error('Failed to submit order. Please try again.');
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to submit order. Please try again.');
       }
 
       setOrderCode(code);

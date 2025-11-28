@@ -64,4 +64,30 @@ export interface OrderItem {
   price: number;
 }
 
+// Pending order - stored in DB, agent fetches details using order_code
+export interface PendingOrder {
+  id?: string;
+  order_code: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email: string | null;
+  address_line1: string;
+  address_city: string;
+  address_notes: string | null;
+  total_amount: number;
+  payment_method: string;
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  created_at?: string;
+}
 
+export interface PendingOrderItem {
+  id?: string;
+  pending_order_id: string;
+  product_id: string;
+  product_name: string;
+  sku: string;
+  quantity: number;
+  unit_price: number;
+  price_type: 'retail' | 'wholesale';
+  subtotal: number;
+}

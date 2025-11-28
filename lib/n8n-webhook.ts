@@ -1,5 +1,4 @@
-// n8n Webhook Integration
-// Orders are sent through our API route to avoid CORS issues
+// Order submission - saves to DB, notifies n8n agent with order code only
 
 export interface OrderWebhookPayload {
   order_code: string;
@@ -28,11 +27,10 @@ export interface OrderWebhookPayload {
   created_at: string;
 }
 
-export async function sendOrderToN8N(payload: OrderWebhookPayload): Promise<boolean> {
+export async function sendOrderToN8N(payload: OrderWebhookPayload): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log('Sending order via API route...');
+    console.log('Submitting order:', payload.order_code);
     
-    // Use our API route to forward to n8n (avoids CORS issues)
     const response = await fetch('/api/order', {
       method: 'POST',
       headers: {
@@ -45,16 +43,14 @@ export async function sendOrderToN8N(payload: OrderWebhookPayload): Promise<bool
     console.log('API response:', data);
 
     if (response.ok && data.success) {
-      console.log('✅ Order submitted successfully');
-      return true;
+      console.log('✅ Order saved successfully');
+      return { success: true };
     }
 
-    console.error('Order API returned error:', data);
-    // Still return true to not block the order
-    return true;
+    console.error('Order failed:', data.error);
+    return { success: false, error: data.error || 'Failed to save order' };
   } catch (error) {
-    console.error('Error sending order:', error);
-    // Return true anyway - errors shouldn't block orders
-    return true;
+    console.error('Error submitting order:', error);
+    return { success: false, error: 'Network error - please try again' };
   }
 }
