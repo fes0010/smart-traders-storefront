@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Product } from '@/lib/supabase';
 import { useCartStore } from '@/lib/cart-store';
-import { ShoppingCart, Package, Check, Sparkles } from 'lucide-react';
+import { ShoppingCart, Package, Check } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -15,11 +15,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCartStore();
 
   const price = selectedPriceType === 'retail' ? product.retail_price : product.wholesale_price;
-  const isLowStock = product.quantity <= product.min_stock_level && product.quantity > 0;
-  const isOutOfStock = product.quantity === 0;
 
   const handleAddToCart = () => {
-    if (isOutOfStock) return;
     addItem(product, selectedPriceType);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1500);
@@ -38,21 +35,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         ) : (
           <Package className="w-16 h-16 text-[color:var(--muted)]" />
         )}
-
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {isLowStock && (
-            <span className="badge badge-warning">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Low Stock
-            </span>
-          )}
-          {isOutOfStock && (
-            <span className="bg-red-500 text-white text-xs px-2.5 py-1 rounded-full font-medium">
-              Out of Stock
-            </span>
-          )}
-        </div>
 
         {/* SKU Badge */}
         <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-lg backdrop-blur-sm">
@@ -113,21 +95,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {selectedPriceType === 'retail' ? 'Retail' : 'Wholesale'} price
               </div>
             )}
-            {product.quantity > 0 && (
-              <div className="text-xs text-[color:var(--muted)] mt-1">
-                {product.quantity} in stock
-              </div>
-            )}
           </div>
 
           <button
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
             className={`p-3.5 rounded-xl transition-all active:scale-95 ${
               isAdded
                 ? 'bg-[color:var(--success)] text-white'
-                : isOutOfStock
-                ? 'bg-[color:var(--accent)] text-[color:var(--muted)] cursor-not-allowed'
                 : 'btn-primary'
             }`}
           >

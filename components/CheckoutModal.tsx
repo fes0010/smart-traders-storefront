@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
-import { supabase, Customer } from '@/lib/supabase';
+import { Customer } from '@/lib/supabase';
 import { sendOrderToN8N, OrderWebhookPayload } from '@/lib/n8n-webhook';
 import { X, Check, Loader2, CreditCard, Truck, ShoppingBag } from 'lucide-react';
 
@@ -34,62 +34,47 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     try {
       const code = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
-      const { data: transaction, error: transactionError } = await supabase
-        .from('transactions')
-        .insert({
-          customer_name: `${customer.first_name} ${customer.last_name || ''}`.trim(),
-          customer_phone: customer.phone,
-          total_amount: getTotalPrice(),
-          payment_method: paymentMethod,
-          view_mode: 'retail',
-          unique_code: code,
-          address_line1: address.line1 || null,
-          address_city: address.city || null,
-          address_notes: address.notes || null,
-        })
-        .select()
-        .single();
-
-      if (transactionError) throw transactionError;
-
-      const transactionItems = items.map((item) => ({
-        transaction_id: transaction.id,
-        product_id: item.id,
-        quantity: item.cart_quantity,
-        price: item.selected_price_type === 'retail' ? item.retail_price : item.wholesale_price,
-      }));
-
-      const { error: itemsError } = await supabase.from('transaction_items').insert(transactionItems);
-      if (itemsError) throw itemsError;
-
-      for (const item of items) {
-        await supabase.from('products').update({ quantity: item.quantity - item.cart_quantity }).eq('id', item.id);
-      }
-
-      // Send to n8n webhook
+      // Send order to n8n AI agent - the agent will handle database operations
       const webhookPayload: OrderWebhookPayload = {
         order_code: code,
-        customer: { name: `${customer.first_name} ${customer.last_name || ''}`.trim(), phone: customer.phone, email: customer.email || undefined },
-        shipping_address: { line1: address.line1, city: address.city, notes: address.notes || undefined },
+        customer: {
+          name: `${customer.first_name} ${customer.last_name || ''}`.trim(),
+          phone: customer.phone,
+          email: customer.email || undefined,
+        },
+        shipping_address: {
+          line1: address.line1,
+          city: address.city,
+          notes: address.notes || undefined,
+        },
         items: items.map((item) => ({
-          product_id: item.id, product_name: item.name, sku: item.sku, quantity: item.cart_quantity,
+          product_id: item.id,
+          product_name: item.name,
+          sku: item.sku,
+          quantity: item.cart_quantity,
           price: item.selected_price_type === 'retail' ? item.retail_price : item.wholesale_price,
           price_type: item.selected_price_type,
           subtotal: (item.selected_price_type === 'retail' ? item.retail_price : item.wholesale_price) * item.cart_quantity,
         })),
         total_amount: getTotalPrice(),
         payment_method: paymentMethod,
-        currency: process.env.NEXT_PUBLIC_CURRENCY || 'USD',
+        currency: process.env.NEXT_PUBLIC_CURRENCY || 'KES',
         created_at: new Date().toISOString(),
       };
-      await sendOrderToN8N(webhookPayload);
+
+      const success = await sendOrderToN8N(webhookPayload);
+      
+      if (!success) {
+        throw new Error('Failed to submit order. Please try again.');
+      }
 
       setOrderCode(code);
       setOrderComplete(true);
       clearCart();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
-      alert('Failed to complete order. Please try again.');
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(message);
     } finally {
       setIsProcessing(false);
     }
@@ -113,7 +98,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           <div className="flex items-center justify-between p-5 border-b sticky top-0 bg-[var(--card-bg)] border-[color:var(--border)] rounded-t-2xl">
             <h2 className="text-xl font-bold flex items-center gap-2">
               {orderComplete ? <Check className="w-6 h-6 text-[color:var(--success)]" /> : <ShoppingBag className="w-6 h-6" />}
-              {orderComplete ? 'Order Complete!' : 'Checkout'}
+              {orderComplete ? 'Order Submitted!' : 'Checkout'}
             </h2>
             <button onClick={handleClose} className="p-2 hover:bg-[color:var(--accent)] rounded-xl transition-colors">
               <X className="w-6 h-6" />
@@ -127,11 +112,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   <Check className="w-10 h-10 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Thank you! 🎉</h3>
-                <p className="text-[color:var(--muted)] mb-6">Your order has been placed successfully.</p>
+                <p className="text-[color:var(--muted)] mb-2">Your order has been submitted for processing.</p>
+                <p className="text-[color:var(--muted)] mb-6 text-sm">We'll contact you shortly to confirm availability and delivery.</p>
                 <div className="bg-[color:var(--accent)] rounded-xl p-5 mb-6 border border-[color:var(--border)]">
-                  <p className="text-sm text-[color:var(--muted)] mb-1">Order Code</p>
+                  <p className="text-sm text-[color:var(--muted)] mb-1">Order Reference</p>
                   <p className="text-2xl font-mono font-bold text-[color:var(--primary)]">{orderCode}</p>
-                  <p className="text-xs text-[color:var(--muted)] mt-2">Save this code to track your order</p>
+                  <p className="text-xs text-[color:var(--muted)] mt-2">Save this code for your records</p>
                 </div>
                 <button onClick={handleClose} className="w-full btn-primary py-3.5 rounded-xl font-semibold">
                   Continue Shopping
@@ -185,19 +171,31 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
                 {/* Shipping */}
                 <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2"><span className="w-6 h-6 rounded-full hero-gradient text-white text-xs flex items-center justify-center">2</span> Shipping Address</h3>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2"><span className="w-6 h-6 rounded-full hero-gradient text-white text-xs flex items-center justify-center">2</span> Delivery Address</h3>
+                  
+                  {/* Free Delivery Notice */}
+                  <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg px-3 py-2 mb-3 text-sm">
+                    <Truck className="w-4 h-4 flex-shrink-0" />
+                    <span>🎉 FREE delivery within Kagio Town!</span>
+                  </div>
+                  
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Address *</label>
-                      <input type="text" required value={address.line1} onChange={(e) => setAddress({ ...address, line1: e.target.value })} className="w-full px-4 py-2.5 border border-[color:var(--border)] rounded-xl focus:ring-2 focus:ring-[color:var(--primary)] bg-[var(--card-bg)]" placeholder="Street address" />
+                      <input type="text" required value={address.line1} onChange={(e) => setAddress({ ...address, line1: e.target.value })} className="w-full px-4 py-2.5 border border-[color:var(--border)] rounded-xl focus:ring-2 focus:ring-[color:var(--primary)] bg-[var(--card-bg)]" placeholder="Street address, landmark" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1.5">City *</label>
-                      <input type="text" required value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} className="w-full px-4 py-2.5 border border-[color:var(--border)] rounded-xl focus:ring-2 focus:ring-[color:var(--primary)] bg-[var(--card-bg)]" />
+                      <label className="block text-sm font-medium mb-1.5">Town/City *</label>
+                      <input type="text" required value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} className="w-full px-4 py-2.5 border border-[color:var(--border)] rounded-xl focus:ring-2 focus:ring-[color:var(--primary)] bg-[var(--card-bg)]" placeholder="e.g., Kagio" />
+                      {address.city && address.city.toLowerCase().includes('kagio') && (
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Free delivery applies!
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Delivery Notes</label>
-                      <textarea value={address.notes} onChange={(e) => setAddress({ ...address, notes: e.target.value })} rows={2} className="w-full px-4 py-2.5 border border-[color:var(--border)] rounded-xl focus:ring-2 focus:ring-[color:var(--primary)] bg-[var(--card-bg)] resize-none" placeholder="Any special instructions..." />
+                      <textarea value={address.notes} onChange={(e) => setAddress({ ...address, notes: e.target.value })} rows={2} className="w-full px-4 py-2.5 border border-[color:var(--border)] rounded-xl focus:ring-2 focus:ring-[color:var(--primary)] bg-[var(--card-bg)] resize-none" placeholder="Any special instructions for delivery..." />
                     </div>
                   </div>
                 </div>
@@ -220,7 +218,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 </div>
 
                 <button type="submit" disabled={isProcessing} className="w-full btn-primary py-4 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>) : 'Place Order'}
+                  {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" /> Submitting Order...</>) : 'Submit Order'}
                 </button>
               </form>
             )}

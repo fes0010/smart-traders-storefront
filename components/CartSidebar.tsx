@@ -103,8 +103,7 @@ export default function CartSidebar({ isOpen, onClose, onCheckout }: CartSidebar
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.cart_quantity + 1)}
-                          disabled={item.cart_quantity >= item.quantity}
-                          className="p-2 hover:bg-[color:var(--accent)] rounded-r-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="p-2 hover:bg-[color:var(--accent)] rounded-r-lg transition-colors"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -122,13 +121,6 @@ export default function CartSidebar({ isOpen, onClose, onCheckout }: CartSidebar
                         </div>
                       </div>
                     </div>
-
-                    {/* Stock Warning */}
-                    {item.cart_quantity >= item.quantity && (
-                      <p className="text-xs text-[color:var(--warning)] mt-2 badge badge-warning inline-flex">
-                        Max stock ({item.quantity})
-                      </p>
-                    )}
                   </div>
 
                   {/* Remove Button */}

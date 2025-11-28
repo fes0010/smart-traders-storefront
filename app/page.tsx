@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase, Product } from '@/lib/supabase';
 import { useCartStore } from '@/lib/cart-store';
-import { ShoppingCart, Search, Filter, Zap, Sparkles, ChevronDown } from 'lucide-react';
+import { findSuggestions } from '@/lib/fuzzy-search';
+import { ShoppingCart, Search, Filter, Zap, Sparkles, ChevronDown, Truck, HelpCircle, X } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import CartSidebar from '@/components/CartSidebar';
 import CheckoutModal from '@/components/CheckoutModal';
@@ -24,11 +25,23 @@ export default function Home() {
   const [realtimeStatus, setRealtimeStatus] = useState<'connected' | 'disconnected'>('disconnected');
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   const { getTotalItems } = useCartStore();
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const hasMore = currentPage < totalPages;
+
+  // Get product names for fuzzy search
+  const productNames = useMemo(() => products.map(p => p.name), [products]);
+
+  // Get fuzzy search suggestions when no results found
+  const suggestions = useMemo(() => {
+    if (filteredProducts.length === 0 && searchTerm.length >= 2) {
+      return findSuggestions(searchTerm, productNames, categories);
+    }
+    return [];
+  }, [filteredProducts.length, searchTerm, productNames, categories]);
 
   // Update displayed products when page or filtered products change
   useEffect(() => {
@@ -63,7 +76,6 @@ export default function Home() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'products' },
         (payload) => {
-          console.log('Real-time update:', payload);
           if (payload.eventType === 'INSERT') {
             setProducts((prev) => [...prev, payload.new as Product]);
           } else if (payload.eventType === 'UPDATE') {
@@ -78,7 +90,6 @@ export default function Home() {
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           setRealtimeStatus('connected');
-          console.log('✅ Real-time connected');
         }
       });
 
@@ -86,7 +97,6 @@ export default function Home() {
       supabase.removeChannel(channel);
     };
   }, []);
-
 
   // Filter products when search or category changes
   useEffect(() => {
@@ -145,6 +155,10 @@ export default function Home() {
     setIsCheckoutOpen(true);
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchTerm(suggestion);
+  };
+
   return (
     <div className="min-h-screen bg-[color:var(--background)]">
       {/* Hero Header */}
@@ -168,7 +182,14 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => setShowGuide(true)}
+                className="p-2 sm:p-3 rounded-xl bg-[var(--card-bg)] border border-[color:var(--border)] text-[color:var(--foreground)] hover:border-[color:var(--primary)] transition-all"
+                title="How to order"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
               <ThemeToggle />
               <button
                 onClick={() => setIsCartOpen(true)}
@@ -216,18 +237,22 @@ export default function Home() {
         </div>
       </header>
 
-
       {/* Welcome Banner */}
       {!isLoading && filteredProducts.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <div className="hero-gradient rounded-2xl p-6 sm:p-8 text-white">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to our store! 👋</h2>
-            <p className="text-white/80 text-sm sm:text-base">
+            <p className="text-white/80 text-sm sm:text-base mb-4">
               Discover amazing products at great prices. Browse our collection and find what you need.
             </p>
+            <div className="flex items-center gap-2 bg-white/20 rounded-lg px-4 py-2 w-fit">
+              <Truck className="w-5 h-5" />
+              <span className="text-sm font-medium">🎉 FREE delivery within Kagio Town!</span>
+            </div>
           </div>
         </div>
       )}
+
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -246,12 +271,31 @@ export default function Home() {
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[color:var(--accent)] flex items-center justify-center">
               <Search className="w-10 h-10 text-[color:var(--muted)]" />
             </div>
-            <p className="text-[color:var(--foreground)] text-xl font-semibold mb-2">No products found</p>
-            <p className="text-[color:var(--muted)]">Try adjusting your search or filter</p>
+            <p className="text-[color:var(--foreground)] text-xl font-semibold mb-2">No products found for "{searchTerm}"</p>
+            <p className="text-[color:var(--muted)] mb-4">Try adjusting your search or filter</p>
+            
+            {/* Fuzzy Search Suggestions */}
+            {suggestions.length > 0 && (
+              <div className="mb-6">
+                <p className="text-[color:var(--muted)] mb-3">Did you mean?</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="px-4 py-2 bg-[color:var(--accent)] border border-[color:var(--border)] rounded-xl text-[color:var(--foreground)] hover:border-[color:var(--primary)] hover:bg-[color:var(--primary)] hover:text-[color:var(--on-primary)] transition-all font-medium"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="mt-4 px-6 py-2 btn-primary rounded-xl"
+                className="px-6 py-2 btn-primary rounded-xl"
               >
                 Clear search
               </button>
@@ -302,12 +346,122 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-[color:var(--border)] py-8 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm text-[color:var(--muted)]">
-            © {new Date().getFullYear()} {process.env.NEXT_PUBLIC_STORE_NAME || 'Smart Traders Store'}. All rights reserved.
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-[color:var(--muted)]">
+              © {new Date().getFullYear()} {process.env.NEXT_PUBLIC_STORE_NAME || 'Smart Traders Store'}. All rights reserved.
+            </p>
+            <div className="flex items-center gap-2 text-sm text-[color:var(--success)]">
+              <Truck className="w-4 h-4" />
+              <span>Free delivery within Kagio Town</span>
+            </div>
+          </div>
         </div>
       </footer>
+
+      {/* How to Order Guide Modal */}
+      {showGuide && (
+        <>
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50" onClick={() => setShowGuide(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-[var(--card-bg)] text-[color:var(--foreground)] rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-[color:var(--border)]">
+              <div className="flex items-center justify-between p-5 border-b border-[color:var(--border)] sticky top-0 bg-[var(--card-bg)] rounded-t-2xl">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <HelpCircle className="w-6 h-6 text-[color:var(--primary)]" />
+                  How to Order
+                </h2>
+                <button onClick={() => setShowGuide(false)} className="p-2 hover:bg-[color:var(--accent)] rounded-xl transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="p-5 space-y-6">
+                {/* Step 1 */}
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full hero-gradient text-white flex items-center justify-center font-bold flex-shrink-0">1</div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Browse Products</h3>
+                    <p className="text-sm text-[color:var(--muted)]">
+                      Scroll through our products or use the search bar to find what you need. You can also filter by category.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full hero-gradient text-white flex items-center justify-center font-bold flex-shrink-0">2</div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Add to Cart</h3>
+                    <p className="text-sm text-[color:var(--muted)]">
+                      Click the cart icon on any product to add it to your shopping cart. You can add multiple items.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full hero-gradient text-white flex items-center justify-center font-bold flex-shrink-0">3</div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Review Your Cart</h3>
+                    <p className="text-sm text-[color:var(--muted)]">
+                      Click the cart icon in the header to view your items. Adjust quantities or remove items as needed.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full hero-gradient text-white flex items-center justify-center font-bold flex-shrink-0">4</div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Checkout</h3>
+                    <p className="text-sm text-[color:var(--muted)]">
+                      Click "Proceed to Checkout" and fill in your details: name, phone number, and delivery address.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 5 */}
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full hero-gradient text-white flex items-center justify-center font-bold flex-shrink-0">5</div>
+                  <div>
+                    <h3 className="font-semibold mb-1">Place Order</h3>
+                    <p className="text-sm text-[color:var(--muted)]">
+                      Choose your payment method and click "Place Order". You'll receive an order code to track your order.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Free Delivery Notice */}
+                <div className="bg-[color:var(--accent)] rounded-xl p-4 border border-[color:var(--border)]">
+                  <div className="flex items-center gap-3">
+                    <Truck className="w-8 h-8 text-[color:var(--success)]" />
+                    <div>
+                      <h3 className="font-semibold text-[color:var(--success)]">Free Delivery!</h3>
+                      <p className="text-sm text-[color:var(--muted)]">
+                        Enjoy FREE delivery for all orders within Kagio Town. Orders outside Kagio may have delivery charges.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div className="text-center pt-2">
+                  <p className="text-sm text-[color:var(--muted)]">
+                    Need help? Contact us for assistance with your order.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setShowGuide(false)}
+                  className="w-full btn-primary py-3 rounded-xl font-semibold"
+                >
+                  Got it, let's shop!
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Cart Sidebar */}
       <CartSidebar 
