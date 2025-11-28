@@ -197,10 +197,11 @@ export default function Home() {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setShowGuide(true)}
-                className="p-2 sm:p-3 rounded-xl bg-[var(--card-bg)] border border-[color:var(--border)] text-[color:var(--foreground)] hover:border-[color:var(--primary)] transition-all"
+                className="flex items-center gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-[var(--card-bg)] border border-[color:var(--border)] text-[color:var(--foreground)] hover:border-[color:var(--primary)] transition-all"
                 title="How to order"
               >
-                <HelpCircle className="w-5 h-5" />
+                <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-xs sm:text-sm font-medium">How to Order</span>
               </button>
               <ThemeToggle />
               <button
