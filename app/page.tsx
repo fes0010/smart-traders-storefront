@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase, Product } from '@/lib/supabase';
 import { useCartStore } from '@/lib/cart-store';
 import { findSuggestions } from '@/lib/fuzzy-search';
-import { ShoppingCart, Search, Filter, Zap, Sparkles, ChevronDown, Truck, HelpCircle, X } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Zap, Sparkles, ChevronDown, Truck, HelpCircle, X, Phone } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import CartSidebar from '@/components/CartSidebar';
 import CheckoutModal from '@/components/CheckoutModal';
@@ -363,9 +363,18 @@ export default function Home() {
             <p className="text-sm text-[color:var(--muted)]">
               © {new Date().getFullYear()} {process.env.NEXT_PUBLIC_STORE_NAME || 'Smart Traders Store'}. All rights reserved.
             </p>
-            <div className="flex items-center gap-2 text-sm text-[color:var(--success)]">
-              <Truck className="w-4 h-4" />
-              <span>Free delivery within Kagio Town</span>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-2 text-sm text-[color:var(--success)]">
+                <Truck className="w-4 h-4" />
+                <span>Free delivery within Kagio Town</span>
+              </div>
+              <a 
+                href="tel:0711489639" 
+                className="flex items-center gap-2 text-sm text-[color:var(--primary)] hover:underline"
+              >
+                <Phone className="w-4 h-4" />
+                <span>Call John: 0711489639</span>
+              </a>
             </div>
           </div>
         </div>
@@ -457,10 +466,18 @@ export default function Home() {
                 </div>
 
                 {/* Contact Info */}
+                {/* Contact Info */}
                 <div className="text-center pt-2">
-                  <p className="text-sm text-[color:var(--muted)]">
+                  <p className="text-sm text-[color:var(--muted)] mb-3">
                     Need help? Contact us for assistance with your order.
                   </p>
+                  <a 
+                    href="tel:0711489639" 
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[color:var(--accent)] border border-[color:var(--border)] rounded-xl text-[color:var(--primary)] hover:border-[color:var(--primary)] transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span className="font-medium">Call John: 0711489639</span>
+                  </a>
                 </div>
 
                 <button
