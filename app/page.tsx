@@ -269,9 +269,9 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="rounded-2xl p-4 card">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="rounded-xl sm:rounded-2xl p-2 sm:p-4 card">
                 <div className="h-48 rounded-xl mb-4 skeleton"></div>
                 <div className="h-4 rounded mb-2 skeleton"></div>
                 <div className="h-4 rounded w-2/3 skeleton"></div>
@@ -321,7 +321,7 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
               {displayedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

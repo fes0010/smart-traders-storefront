@@ -4,12 +4,50 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+interface OrderItem {
+  product_id: string;
+  product_name: string;
+  sku: string;
+  quantity: number;
+  price: number;
+  price_type: string;
+  subtotal: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json();
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // 1. Save pending order to database
+    // 1. Validate stock availability for all items (prevents overselling)
+    const productIds = payload.items.map((item: OrderItem) => item.product_id);
+    const { data: products, error: stockError } = await supabase
+      .from('products')
+      .select('id, name, quantity')
+      .in('id', productIds);
+
+    if (stockError) {
+      console.error('Stock check error:', stockError);
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Unable to verify stock availability' 
+      }, { status: 500 });
+    }
+
+    // Check each item has sufficient stock
+    const stockMap = new Map(products?.map(p => [p.id, p.quantity]) || []);
+    for (const item of payload.items as OrderItem[]) {
+      const available = stockMap.get(item.product_id) || 0;
+      if (available < item.quantity) {
+        const productName = products?.find(p => p.id === item.product_id)?.name || item.product_name;
+        return NextResponse.json({ 
+          success: false, 
+          error: `Sorry, "${productName}" has insufficient stock (${available} available, ${item.quantity} requested)` 
+        }, { status: 400 });
+      }
+    }
+
+    // 2. Save pending order to database
     const { data: pendingOrder, error: orderError } = await supabase
       .from('pending_orders')
       .insert({
@@ -35,16 +73,8 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // 2. Save order items
-    const orderItems = payload.items.map((item: {
-      product_id: string;
-      product_name: string;
-      sku: string;
-      quantity: number;
-      price: number;
-      price_type: string;
-      subtotal: number;
-    }) => ({
+    // 3. Save order items
+    const orderItems = payload.items.map((item: OrderItem) => ({
       pending_order_id: pendingOrder.id,
       product_id: item.product_id,
       product_name: item.product_name,
@@ -64,7 +94,7 @@ export async function POST(request: NextRequest) {
       // Don't fail the order, items can be recovered from the main order
     }
 
-    // 3. Notify n8n with just the order code (agent will fetch details from DB)
+    // 4. Notify n8n with just the order code (agent will fetch details from DB)
     const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
     
     if (webhookUrl) {

@@ -23,9 +23,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group rounded-2xl overflow-hidden card">
+    <div className="group rounded-xl sm:rounded-2xl overflow-hidden card">
       {/* Product Image */}
-      <div className="relative h-52 bg-[color:var(--accent)] flex items-center justify-center overflow-hidden">
+      <div className="relative h-28 sm:h-44 lg:h-52 bg-[color:var(--accent)] flex items-center justify-center overflow-hidden">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -33,50 +33,51 @@ export default function ProductCard({ product }: ProductCardProps) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <Package className="w-16 h-16 text-[color:var(--muted)]" />
+          <Package className="w-10 sm:w-16 h-10 sm:h-16 text-[color:var(--muted)]" />
         )}
 
-        {/* SKU Badge */}
-        <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-lg backdrop-blur-sm">
+        {/* SKU Badge - hidden on mobile */}
+        <div className="hidden sm:block absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-lg backdrop-blur-sm">
           {product.sku}
         </div>
       </div>
 
       {/* Product Info */}
-      <div className="p-5">
+      <div className="p-2 sm:p-4">
         {product.category && (
-          <span className="text-xs text-[color:var(--primary)] font-medium uppercase tracking-wider">
+          <span className="hidden sm:inline text-xs text-[color:var(--primary)] font-medium uppercase tracking-wider">
             {product.category}
           </span>
         )}
 
-        <h3 className="text-lg font-semibold text-[color:var(--foreground)] mt-1 mb-2 line-clamp-2 min-h-[3.5rem]">
+        <h3 className="text-xs sm:text-base font-semibold text-[color:var(--foreground)] sm:mt-1 mb-1 sm:mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[3rem]">
           {product.name}
         </h3>
 
+        {/* Description - hidden on mobile */}
         {product.description && (
-          <p className="text-sm text-[color:var(--muted)] mb-4 line-clamp-2">{product.description}</p>
+          <p className="hidden sm:block text-sm text-[color:var(--muted)] mb-3 line-clamp-2">{product.description}</p>
         )}
 
-        {/* Price Type Selector */}
+        {/* Price Type Selector - compact on mobile */}
         {product.selling_mode === 'both' && (
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-1 sm:gap-2 mb-2 sm:mb-3">
             <button
               onClick={() => setSelectedPriceType('retail')}
-              className={`flex-1 text-xs py-2 px-3 rounded-lg font-medium transition-all ${
+              className={`flex-1 text-[10px] sm:text-xs py-1 sm:py-2 px-1 sm:px-3 rounded-md sm:rounded-lg font-medium transition-all ${
                 selectedPriceType === 'retail'
                   ? 'btn-primary'
-                  : 'bg-[color:var(--accent)] text-[color:var(--muted)] hover:text-[color:var(--foreground)]'
+                  : 'bg-[color:var(--accent)] text-[color:var(--muted)]'
               }`}
             >
               Retail
             </button>
             <button
               onClick={() => setSelectedPriceType('wholesale')}
-              className={`flex-1 text-xs py-2 px-3 rounded-lg font-medium transition-all ${
+              className={`flex-1 text-[10px] sm:text-xs py-1 sm:py-2 px-1 sm:px-3 rounded-md sm:rounded-lg font-medium transition-all ${
                 selectedPriceType === 'wholesale'
                   ? 'btn-primary'
-                  : 'bg-[color:var(--accent)] text-[color:var(--muted)] hover:text-[color:var(--foreground)]'
+                  : 'bg-[color:var(--accent)] text-[color:var(--muted)]'
               }`}
             >
               Wholesale
@@ -85,30 +86,30 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Price and Add to Cart */}
-        <div className="flex items-center justify-between pt-2 border-t border-[color:var(--border)]">
+        <div className="flex items-center justify-between pt-1 sm:pt-2 border-t border-[color:var(--border)]">
           <div>
-            <div className="text-2xl font-bold text-[color:var(--foreground)]">
-              {process.env.NEXT_PUBLIC_CURRENCY} {price.toFixed(2)}
+            <div className="text-sm sm:text-xl font-bold text-[color:var(--foreground)]">
+              <span className="text-[10px] sm:text-sm">{process.env.NEXT_PUBLIC_CURRENCY}</span> {price.toFixed(0)}
             </div>
             {product.selling_mode === 'both' && (
-              <div className="text-xs text-[color:var(--muted)]">
-                {selectedPriceType === 'retail' ? 'Retail' : 'Wholesale'} price
+              <div className="hidden sm:block text-xs text-[color:var(--muted)]">
+                {selectedPriceType === 'retail' ? 'Retail' : 'Wholesale'}
               </div>
             )}
           </div>
 
           <button
             onClick={handleAddToCart}
-            className={`p-3.5 rounded-xl transition-all active:scale-95 ${
+            className={`p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all active:scale-95 ${
               isAdded
                 ? 'bg-[color:var(--success)] text-white'
                 : 'btn-primary'
             }`}
           >
             {isAdded ? (
-              <Check className="w-5 h-5" />
+              <Check className="w-4 h-4 sm:w-5 sm:h-5" />
             ) : (
-              <ShoppingCart className="w-5 h-5" />
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
           </button>
         </div>
