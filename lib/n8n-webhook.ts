@@ -1,5 +1,5 @@
 // n8n Webhook Integration
-// Configure your n8n webhook URL in .env as NEXT_PUBLIC_N8N_WEBHOOK_URL
+// Orders are sent through our API route to avoid CORS issues
 
 export interface OrderWebhookPayload {
   order_code: string;
@@ -29,18 +29,11 @@ export interface OrderWebhookPayload {
 }
 
 export async function sendOrderToN8N(payload: OrderWebhookPayload): Promise<boolean> {
-  const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
-  
-  if (!webhookUrl) {
-    console.warn('n8n webhook URL not configured. Order will be accepted without webhook.');
-    // Return true to allow order to complete even without webhook
-    return true;
-  }
-
   try {
-    console.log('Sending order to n8n:', webhookUrl);
+    console.log('Sending order via API route...');
     
-    const response = await fetch(webhookUrl, {
+    // Use our API route to forward to n8n (avoids CORS issues)
+    const response = await fetch('/api/order', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -48,21 +41,20 @@ export async function sendOrderToN8N(payload: OrderWebhookPayload): Promise<bool
       body: JSON.stringify(payload),
     });
 
-    console.log('n8n response status:', response.status);
+    const data = await response.json();
+    console.log('API response:', data);
 
-    // Accept any 2xx response as success
-    if (response.ok) {
-      console.log('✅ Order sent to n8n successfully');
+    if (response.ok && data.success) {
+      console.log('✅ Order submitted successfully');
       return true;
     }
 
-    // Log error but still return true to not block the order
-    console.error('n8n webhook returned error:', response.status, response.statusText);
-    // Return true anyway - we don't want to block orders if webhook has issues
+    console.error('Order API returned error:', data);
+    // Still return true to not block the order
     return true;
   } catch (error) {
-    console.error('Error sending order to n8n:', error);
-    // Return true anyway - network errors shouldn't block orders
+    console.error('Error sending order:', error);
+    // Return true anyway - errors shouldn't block orders
     return true;
   }
 }
