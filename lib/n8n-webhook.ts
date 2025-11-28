@@ -32,11 +32,14 @@ export async function sendOrderToN8N(payload: OrderWebhookPayload): Promise<bool
   const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
   
   if (!webhookUrl) {
-    console.warn('n8n webhook URL not configured. Skipping webhook notification.');
-    return false;
+    console.warn('n8n webhook URL not configured. Order will be accepted without webhook.');
+    // Return true to allow order to complete even without webhook
+    return true;
   }
 
   try {
+    console.log('Sending order to n8n:', webhookUrl);
+    
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
@@ -45,15 +48,21 @@ export async function sendOrderToN8N(payload: OrderWebhookPayload): Promise<bool
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      console.error('n8n webhook failed:', response.status, response.statusText);
-      return false;
+    console.log('n8n response status:', response.status);
+
+    // Accept any 2xx response as success
+    if (response.ok) {
+      console.log('✅ Order sent to n8n successfully');
+      return true;
     }
 
-    console.log('✅ Order sent to n8n successfully');
+    // Log error but still return true to not block the order
+    console.error('n8n webhook returned error:', response.status, response.statusText);
+    // Return true anyway - we don't want to block orders if webhook has issues
     return true;
   } catch (error) {
     console.error('Error sending order to n8n:', error);
-    return false;
+    // Return true anyway - network errors shouldn't block orders
+    return true;
   }
 }

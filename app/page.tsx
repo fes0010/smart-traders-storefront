@@ -49,6 +49,18 @@ export default function Home() {
     setDisplayedProducts(filteredProducts.slice(0, endIndex));
   }, [currentPage, filteredProducts]);
 
+  // Lock body scroll when guide modal is open
+  useEffect(() => {
+    if (showGuide) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showGuide]);
+
   // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
