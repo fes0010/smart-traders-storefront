@@ -7,17 +7,17 @@ import { ShoppingCart, Package, Check } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
+  viewMode: 'retail' | 'wholesale';
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
-  const [selectedPriceType, setSelectedPriceType] = useState<'retail' | 'wholesale'>('retail');
+export default function ProductCard({ product, viewMode }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
   const { addItem } = useCartStore();
 
-  const price = selectedPriceType === 'retail' ? product.retail_price : product.wholesale_price;
+  const price = viewMode === 'retail' ? product.retail_price : product.wholesale_price;
 
   const handleAddToCart = () => {
-    addItem(product, selectedPriceType);
+    addItem(product, viewMode);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1500);
   };
@@ -59,30 +59,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="hidden sm:block text-sm text-[color:var(--muted)] mb-3 line-clamp-2">{product.description}</p>
         )}
 
-        {/* Price Type Selector - compact on mobile */}
-        {product.selling_mode === 'both' && (
-          <div className="flex gap-1 sm:gap-2 mb-2 sm:mb-3">
-            <button
-              onClick={() => setSelectedPriceType('retail')}
-              className={`flex-1 text-[10px] sm:text-xs py-1 sm:py-2 px-1 sm:px-3 rounded-md sm:rounded-lg font-medium transition-all ${
-                selectedPriceType === 'retail'
-                  ? 'btn-primary'
-                  : 'bg-[color:var(--accent)] text-[color:var(--muted)]'
-              }`}
-            >
-              Retail
-            </button>
-            <button
-              onClick={() => setSelectedPriceType('wholesale')}
-              className={`flex-1 text-[10px] sm:text-xs py-1 sm:py-2 px-1 sm:px-3 rounded-md sm:rounded-lg font-medium transition-all ${
-                selectedPriceType === 'wholesale'
-                  ? 'btn-primary'
-                  : 'bg-[color:var(--accent)] text-[color:var(--muted)]'
-              }`}
-            >
-              Wholesale
-            </button>
-          </div>
+        {/* Wholesale minimum notice */}
+        {viewMode === 'wholesale' && (
+          <p className="text-[9px] sm:text-xs text-[color:var(--primary)] mb-1 sm:mb-2">
+            Min. 4+ pieces
+          </p>
         )}
 
         {/* Price and Add to Cart */}
@@ -91,11 +72,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="text-sm sm:text-xl font-bold text-[color:var(--foreground)]">
               <span className="text-[10px] sm:text-sm">{process.env.NEXT_PUBLIC_CURRENCY}</span> {price.toFixed(0)}
             </div>
-            {product.selling_mode === 'both' && (
-              <div className="hidden sm:block text-xs text-[color:var(--muted)]">
-                {selectedPriceType === 'retail' ? 'Retail' : 'Wholesale'}
-              </div>
-            )}
+            <div className="hidden sm:block text-xs text-[color:var(--muted)]">
+              {viewMode === 'retail' ? 'per piece' : 'per piece (4+)'}
+            </div>
           </div>
 
           <button

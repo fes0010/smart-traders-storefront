@@ -26,6 +26,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [viewMode, setViewMode] = useState<'retail' | 'wholesale'>('retail');
 
   const { getTotalItems } = useCartStore();
 
@@ -128,12 +129,18 @@ export default function Home() {
       );
     }
 
-    filtered = filtered.filter(
-      (p) => p.status === 'active' && (p.selling_mode === 'retail' || p.selling_mode === 'both')
-    );
+    // Filter by view mode
+    filtered = filtered.filter((p) => {
+      if (p.status !== 'active') return false;
+      if (viewMode === 'retail') {
+        return p.selling_mode === 'retail' || p.selling_mode === 'both';
+      } else {
+        return p.selling_mode === 'wholesale' || p.selling_mode === 'both';
+      }
+    });
 
     setFilteredProducts(filtered);
-  }, [products, selectedCategory, searchTerm]);
+  }, [products, selectedCategory, searchTerm, viewMode]);
 
   // Extract unique categories
   useEffect(() => {
@@ -216,6 +223,31 @@ export default function Home() {
                 )}
               </button>
             </div>
+          </div>
+
+          {/* Retail/Wholesale Toggle */}
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <button
+              onClick={() => setViewMode('retail')}
+              className={`flex items-center gap-2 px-5 sm:px-8 py-3 rounded-xl text-sm sm:text-base font-semibold transition-all border-2 ${
+                viewMode === 'retail'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/30'
+                  : 'bg-[var(--card-bg)] text-[color:var(--muted)] border-[color:var(--border)] hover:border-blue-400'
+              }`}
+            >
+              🛒 Retail
+            </button>
+            <button
+              onClick={() => setViewMode('wholesale')}
+              className={`flex items-center gap-2 px-5 sm:px-8 py-3 rounded-xl text-sm sm:text-base font-semibold transition-all border-2 ${
+                viewMode === 'wholesale'
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30'
+                  : 'bg-[var(--card-bg)] text-[color:var(--muted)] border-[color:var(--border)] hover:border-orange-400'
+              }`}
+            >
+              📦 Wholesale
+              <span className="text-xs opacity-80">(4+ pcs)</span>
+            </button>
           </div>
 
           {/* Search and Filters */}
@@ -324,7 +356,7 @@ export default function Home() {
             
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
               {displayedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} viewMode={viewMode} />
               ))}
             </div>
 
